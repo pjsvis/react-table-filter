@@ -1,22 +1,29 @@
 /* Ref: https://codepen.io/smashing-magazine/pen/PVGZEQ */
  tr {
   padding: 4px;
-  border-bottom: 1px solid #666;
+  border-bottom: 1px solid silver;
+  border-left: 1px solid silver;
 }
 
 th {
-  background-color: #aliceblue;
-  color: #fff;
+  /* background-color: #999; */
+  /* color: #fff; */
   white-space: nowrap;
 }
 
 th,
 td {
   text-align: left;
-  padding: 0.5em 1em;
+  padding: 0.25em 0.5em;
   white-space: nowrap;
-}
+  border-left: 1px solid silver;
+}  
 
+td.numeric {
+    text-align: right;
+  }  
+
+input {padding: 4px;}
 /* 
   th,
   td {
