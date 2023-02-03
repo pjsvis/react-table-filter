@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { DebouncedInput } from "./debounced-input";
 
 import "./index.css";
+import './table-styles.css'
 
 import {
   Column,
@@ -33,46 +34,11 @@ import {
 import { makeData, Person } from "./makeData";
 import { Filter } from "./filter";
 import { TableNav } from "./table-nav";
-
-declare module "@tanstack/table-core" {
-  interface FilterFns {
-    fuzzy: FilterFn<unknown>;
-  }
-  interface FilterMeta {
-    itemRank: RankingInfo;
-  }
-}
-
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-  // Rank the item
-  const itemRank = rankItem(row.getValue(columnId), value);
-
-  // Store the itemRank info
-  addMeta({
-    itemRank,
-  });
-
-  // Return if the item should be filtered in/out
-  return itemRank.passed;
-};
-
-const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
-  let dir = 0;
-
-  // Only sort by rank if the column has ranking information
-  if (rowA.columnFiltersMeta[columnId]) {
-    dir = compareItems(
-      rowA.columnFiltersMeta[columnId]?.itemRank!,
-      rowB.columnFiltersMeta[columnId]?.itemRank!
-    );
-  }
-
-  // Provide an alphanumeric fallback for when the item ranks are equal
-  return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
-};
+import { fuzzyFilter, fuzzySort } from "./fuzzy-utils";
+import { Dump } from "./dump";
 
 function App() {
-  const rerender = React.useReducer(() => ({}), {})[1];
+  // const rerender = React.useReducer(() => ({}), {})[1];
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -248,97 +214,14 @@ function App() {
           })}
         </tbody>
       </table>
-      
+
       <TableNav table={table} />
+
+      <Dump table={table} />
       
-      <div>{table.getPrePaginationRowModel().rows.length} Rows</div>
-      <div>
-        <button onClick={() => rerender()}>Force Rerender</button>
-      </div>
-      <div>
-        <button onClick={() => refreshData()}>Refresh Data</button>
-      </div>
-      <pre>{JSON.stringify(table.getState(), null, 2)}</pre>
     </div>
   );
 }
-
-// function Filter({
-//   column,
-//   table,
-// }: {
-//   column: Column<any, unknown>;
-//   table: Table<any>;
-// }) {
-//   const firstValue = table
-//     .getPreFilteredRowModel()
-//     .flatRows[0]?.getValue(column.id);
-
-//   const columnFilterValue = column.getFilterValue();
-
-//   const sortedUniqueValues = React.useMemo(
-//     () =>
-//       typeof firstValue === "number"
-//         ? []
-//         : Array.from(column.getFacetedUniqueValues().keys()).sort(),
-//     [column.getFacetedUniqueValues()]
-//   );
-
-//   return typeof firstValue === "number" ? (
-//     <div>
-//       <div className="flex space-x-2">
-//         <DebouncedInput
-//           type="number"
-//           min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
-//           max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
-//           value={(columnFilterValue as [number, number])?.[0] ?? ""}
-//           onChange={(value) =>
-//             column.setFilterValue((old: [number, number]) => [value, old?.[1]])
-//           }
-//           placeholder={`Min ${
-//             column.getFacetedMinMaxValues()?.[0]
-//               ? `(${column.getFacetedMinMaxValues()?.[0]})`
-//               : ""
-//           }`}
-//           className="w-24 border shadow rounded"
-//         />
-//         <DebouncedInput
-//           type="number"
-//           min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
-//           max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
-//           value={(columnFilterValue as [number, number])?.[1] ?? ""}
-//           onChange={(value) =>
-//             column.setFilterValue((old: [number, number]) => [old?.[0], value])
-//           }
-//           placeholder={`Max ${
-//             column.getFacetedMinMaxValues()?.[1]
-//               ? `(${column.getFacetedMinMaxValues()?.[1]})`
-//               : ""
-//           }`}
-//           className="w-24 border shadow rounded"
-//         />
-//       </div>
-//       <div className="h-1" />
-//     </div>
-//   ) : (
-//     <>
-//       <datalist id={column.id + "list"}>
-//         {sortedUniqueValues.slice(0, 5000).map((value: any) => (
-//           <option value={value} key={value} />
-//         ))}
-//       </datalist>
-//       <DebouncedInput
-//         type="text"
-//         value={(columnFilterValue ?? "") as string}
-//         onChange={(value) => column.setFilterValue(value)}
-//         placeholder={`Search... (${column.getFacetedUniqueValues().size})`}
-//         className="w-36 border shadow rounded"
-//         list={column.id + "list"}
-//       />
-//       <div className="h-1" />
-//     </>
-//   );
-// }
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Failed to find the root element");

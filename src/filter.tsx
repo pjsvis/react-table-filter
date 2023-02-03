@@ -1,8 +1,18 @@
-import { Column, Table } from "@tanstack/react-table";
+import { RankingInfo } from "@tanstack/match-sorter-utils";
+import { Column, FilterFn, Table } from "@tanstack/react-table";
 import React from "react";
 import { DebouncedInput } from "./debounced-input";
+
 type Props = { column: Column<any, unknown>; table: Table<any> };
 
+declare module "@tanstack/table-core" {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo;
+  }
+}
 export const Filter = ({ column, table }: Props) => {
   const firstValue = table
     .getPreFilteredRowModel()
