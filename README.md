@@ -1,6 +1,3 @@
-# Example
+# reaact-table-filter
 
-To run this example:
-
-- `npm install` or `yarn`
-- `npm run start` or `yarn start`
+An example of rect-table with filters and fuzzy search.
